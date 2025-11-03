@@ -1,0 +1,11 @@
+with cte1 as (
+SELECT c.customer, round(SUM(s.net_sales)/1000000,2) as total_net_sales
+FROM ns s
+join dim_customer c 
+on c.customer_code = s.customer_code
+WHERE s.fiscal_year = 2021
+GROUP BY c.customer
+) 
+select *, round(total_net_sales * 100 / sum(total_net_sales) over(),2) as pct 
+from cte1
+order by total_net_sales desc
