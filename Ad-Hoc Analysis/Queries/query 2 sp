@@ -1,0 +1,10 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `monthly_sales_of_a_customer_for_a_fiscal_year`(cust_code int)
+BEGIN
+  select date_format(s.date,"%b %y") as month, round(sum(g.gross_price * s.sold_quantity),2) as gross_sales
+  from fact_sales_monthly s
+  join fact_gross_price g
+  on s.product_code = g.product_code and s.fiscal_year = g.fiscal_year
+  where s.customer_code = cust_code
+  group by s.date
+  order by s.date asc;
+END
