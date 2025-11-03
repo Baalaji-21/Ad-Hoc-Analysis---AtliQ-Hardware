@@ -1,0 +1,21 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `market_badge`(in country varchar(45),in fy year,out badge varchar(45))
+BEGIN
+  declare qty int default 0;
+ 
+  if country = '' then 
+   set country = 'india';
+  end if;
+ 
+  select sum(sold_quantity) into qty
+  from fact_sales_monthly
+  join dim_customer using (customer_code)
+  where market = country and fiscal_year = fy
+  group by fiscal_year;
+  
+  if qty>5000000 then
+   set badge = 'Gold';
+  else
+   set badge = 'Silver';
+  end if;
+  
+END
