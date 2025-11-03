@@ -1,0 +1,8 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `top_n_market`(fy int, top_n int)
+BEGIN
+SELECT market, round(SUM(net_sales)/1000000,2) as total_net_sales
+FROM net_sales_table
+WHERE fiscal_year = fy
+GROUP BY market
+order by total_net_sales desc limit top_n;
+END
