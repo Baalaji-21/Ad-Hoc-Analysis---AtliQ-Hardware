@@ -1,0 +1,20 @@
+with gs as
+(select s.date, s.fiscal_year, s.customer_code, s.product_code, s.sold_quantity,
+  g.gross_price as gross_price_per_item, g.gross_price * s.sold_quantity as gross_total, pre.pre_invoice_discount_pct
+from fact_sales_monthly s
+join fact_gross_price g
+  on s.product_code = g.product_code and s.fiscal_year = g.fiscal_year
+join fact_pre_invoice_deductions pre
+  on s.customer_code = pre.customer_code and s.fiscal_year = pre.fiscal_year
+  ),
+nis as
+(select s.*, ((1 - s.pre_invoice_discount_pct) * gross_total) as net_invoice_sales,
+  (po.discounts_pct + po.other_deductions_pct) as post_invoice_deductions_pct  
+from gs s
+join fact_post_invoice_deductions po
+ on s.date = po.date and
+    s.product_code = po.product_code and
+    s.customer_code = po.customer_code
+)
+select s.*, ((1 - s.post_invoice_deductions_pct) * s.net_invoice_sales) as net_sales
+FROM nis s
